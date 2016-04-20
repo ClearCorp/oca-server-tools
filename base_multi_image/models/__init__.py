@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# © 2016 GRAP
+# © 2015 Antiun Ingeniería S.L. - Jairo Llopis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-# -*- encoding: utf-8 -*-
 
-from . import model
+from . import image, owner
