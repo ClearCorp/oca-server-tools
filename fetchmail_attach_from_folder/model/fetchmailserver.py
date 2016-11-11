@@ -1,24 +1,7 @@
-# -*- encoding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    This module copyright (C) 2013 Therp BV (<http://therp.nl>)
-#    All Rights Reserved
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# -*- coding: utf-8 -*-
+# © 2016 ClearCorp
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
 import logging
 import base64
 import simplejson
@@ -30,7 +13,7 @@ from openerp.tools.misc import UnquoteEvalContext
 _logger = logging.getLogger(__name__)
 
 
-class fetchmail_server(models.Model):
+class FetchmailServer(models.Model):
     _inherit = 'fetchmail.server'
 
     folder_ids = fields.One2many(
@@ -46,9 +29,9 @@ class fetchmail_server(models.Model):
             self, cr, uid, ids, server_type=False, ssl=False,
             object_id=False):
         retval = super(
-            fetchmail_server, self).onchange_server_type(cr, uid,
-                                                         ids, server_type, ssl,
-                                                         object_id)
+            FetchmailServer, self).onchange_server_type(cr, uid,
+                                                        ids, server_type, ssl,
+                                                        object_id)
         retval['value']['state'] = 'draft'
         return retval
 
@@ -73,12 +56,11 @@ class fetchmail_server(models.Model):
                 this.handle_folder(connection, folder)
             connection.close()
 
-        return super(fetchmail_server, self).fetch_mail(
+        return super(FetchmailServer, self).fetch_mail(
             cr, uid, check_original, context)
 
     @api.multi
     def handle_folder(self, connection, folder):
-        '''Return ids of objects matched'''
 
         matched_object_ids = []
 
@@ -114,12 +96,10 @@ class fetchmail_server(models.Model):
 
     @api.multi
     def get_msgids(self, connection):
-        '''Return imap ids of messages to process'''
         return connection.search(None, 'UNDELETED')
 
     @api.multi
     def apply_matching(self, connection, folder, msgid, match_algorithm):
-        '''Return ids of objects matched'''
 
         matched_object_ids = []
 
@@ -163,7 +143,6 @@ class fetchmail_server(models.Model):
 
     @api.multi
     def attach_mail(self, connection, object_id, folder, mail_message, msgid):
-        '''Return ids of messages created'''
 
         mail_message_ids = []
 
@@ -211,7 +190,7 @@ class fetchmail_server(models.Model):
         return mail_message_ids
 
     def button_confirm_login(self, cr, uid, ids, context=None):
-        retval = super(fetchmail_server, self).button_confirm_login(
+        retval = super(FetchmailServer, self).button_confirm_login(
             cr, uid, ids, context)
 
         for this in self.browse(cr, uid, ids, context):
@@ -229,7 +208,7 @@ class fetchmail_server(models.Model):
 
     def fields_view_get(self, cr, user, view_id=None, view_type='form',
                         context=None, toolbar=False, submenu=False):
-        result = super(fetchmail_server, self).fields_view_get(
+        result = super(FetchmailServer, self).fields_view_get(
             cr, user, view_id, view_type, context, toolbar, submenu)
 
         if view_type == 'form':
