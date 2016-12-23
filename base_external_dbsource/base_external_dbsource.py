@@ -21,12 +21,17 @@
 
 import os
 import logging
+
+import psycopg2
+
 from openerp.osv import orm, fields
 from openerp.tools.translate import _
 import openerp.tools as tools
-_logger = logging.getLogger(__name__)
 
-CONNECTORS = []
+
+_logger = logging.getLogger(__name__)
+CONNECTORS = [('postgresql', 'PostgreSQL')]
+
 
 try:
     import sqlalchemy
@@ -36,34 +41,31 @@ try:
         CONNECTORS.append(('mssql', 'Microsoft SQL Server'))
         assert pymssql
     except (ImportError, AssertionError):
-        _logger.info('MS SQL Server not available. Please install "pymssql"\
+        _logger.debug('MS SQL Server not available. Please install "pymssql"\
                       python package.')
     try:
         import MySQLdb
         CONNECTORS.append(('mysql', 'MySQL'))
         assert MySQLdb
     except (ImportError, AssertionError):
-        _logger.info('MySQL not available. Please install "mysqldb"\
+        _logger.debug('MySQL not available. Please install "mysqldb"\
                      python package.')
 except:
-    _logger.info('SQL Alchemy not available. Please install "slqalchemy"\
+    _logger.debug('SQL Alchemy not available. Please install "slqalchemy"\
                  python package.')
 try:
     import pyodbc
     CONNECTORS.append(('pyodbc', 'ODBC'))
 except:
-    _logger.info('ODBC libraries not available. Please install "unixodbc"\
+    _logger.debug('ODBC libraries not available. Please install "unixodbc"\
                  and "python-pyodbc" packages.')
 
 try:
     import cx_Oracle
     CONNECTORS.append(('cx_Oracle', 'Oracle'))
 except:
-    _logger.info('Oracle libraries not available. Please install "cx_Oracle"\
+    _logger.debug('Oracle libraries not available. Please install "cx_Oracle"\
                  python package.')
-
-import psycopg2
-CONNECTORS.append(('postgresql', 'PostgreSQL'))
 
 
 class base_external_dbsource(orm.Model):

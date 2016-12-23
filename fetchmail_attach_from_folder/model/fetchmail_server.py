@@ -26,7 +26,6 @@ from lxml import etree
 from openerp import models, fields, api, exceptions
 from openerp.tools.safe_eval import safe_eval
 from openerp.tools.translate import _
-from openerp.tools.misc import UnquoteEvalContext
 _logger = logging.getLogger(__name__)
 
 
@@ -61,6 +60,8 @@ class fetchmail_server(models.Model):
         for this in self.browse(cr, uid, ids, context):
             if this.object_id:
                 check_original.append(this.id)
+            if not this.folder_ids.filtered('active'):
+                continue
 
             context.update(
                 {
@@ -262,11 +263,15 @@ class fetchmail_server(models.Model):
 
             for field in view.xpath('//field'):
                 if field.tag == 'field' and field.get('name') in modifiers:
-                    field.set('modifiers', simplejson.dumps(
-                        dict(
-                            eval(field.attrib['modifiers'],
-                                 UnquoteEvalContext({})),
-                            **modifiers[field.attrib['name']])))
+                    field.set(
+                        'modifiers',
+                        simplejson.dumps(
+                            dict(
+                                simplejson.loads(field.attrib['modifiers']),
+                                **modifiers[field.attrib['name']]
+                            )
+                        ),
+                    )
                 if (field.tag == 'field' and
                         field.get('name') == 'match_algorithm'):
                     field.set('help', docstr)
