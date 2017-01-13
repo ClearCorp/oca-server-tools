@@ -65,7 +65,7 @@ class res_users(Model):
             mail_obj.create(cr, SUPERUSER_ID, {
                 'email_to': admin_user.email,
                 'subject': self._get_translation(
-                    cr, admin_user.lang, _('[WARNING] OpenERP Security Risk')),
+                    cr, admin_user.lang, _('[WARNING] Odoo Security Risk')),
                 'body_html': self._get_translation(
                     cr, admin_user.lang, _(
                         """<pre>User with login '%s' has the same """
