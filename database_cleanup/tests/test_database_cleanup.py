@@ -17,6 +17,21 @@ class TestDatabaseCleanup(TransactionCase):
         self.model = None
 
     def test_database_cleanup(self):
+        # delete some index and check if our module recreated it
+        self.env.cr.execute('drop index res_partner_name_index')
+        create_indexes = self.env['cleanup.create_indexes.wizard'].create({})
+        create_indexes.purge_all()
+        self.env.cr.execute(
+            'select indexname from pg_indexes '
+            "where indexname='res_partner_name_index' and "
+            "tablename='res_partner'"
+        )
+        self.assertEqual(self.env.cr.rowcount, 1)
+        # duplicate a property
+        duplicate_property = self.env['ir.property'].search([], limit=1).copy()
+        purge_property = self.env['cleanup.purge.wizard.property'].create({})
+        purge_property.purge_all()
+        self.assertFalse(duplicate_property.exists())
         # create an orphaned column
         self.cr.execute(
             'alter table res_partner add column database_cleanup_test int')
@@ -59,15 +74,11 @@ class TestDatabaseCleanup(TransactionCase):
         self.registry._pure_function_fields.pop(
             'x_database.cleanup.test.model')
         purge_models = self.env['cleanup.purge.wizard.model'].create({})
-        with self.assertRaisesRegexp(KeyError,
-                                     'x_database.cleanup.test.model'):
-            # TODO: Remove with-assert of KeyError after fix:
-            # https://github.com/odoo/odoo/pull/13978/files#r88654967
-            purge_models.purge_all()
-            # must be removed by the wizard
-            self.assertFalse(self.env['ir.model'].search([
-                ('model', '=', 'x_database.cleanup.test.model'),
-            ]))
+        purge_models.purge_all()
+        # must be removed by the wizard
+        self.assertFalse(self.env['ir.model'].search([
+            ('model', '=', 'x_database.cleanup.test.model'),
+        ]))
 
         # create a nonexistent module
         self.module = self.env['ir.module.module'].create({
